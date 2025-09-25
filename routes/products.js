@@ -1,0 +1,90 @@
+const express = require('express');
+const router = express.Router();
+const db = require('../db'); // Import the database connection
+
+// GET all products
+router.get('/', (req, res) => {
+    db.query("SELECT * FROM product", (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error retrieving products');
+        }
+        res.json(result);
+    });
+});
+
+// GET a single product by ID
+router.get('/:id', (req, res) => {
+    const { id } = req.params;
+    db.query("SELECT * FROM product WHERE id = ?", [id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error retrieving product');
+        }
+        if (result.length === 0) {
+            return res.status(404).send(`Product not found with id: ${id}`);
+        }
+        res.json(result[0]);
+    });
+});
+
+// DELETE a product by ID
+router.delete('/:id', (req, res) => {
+    const { id } = req.params;
+    db.query("DELETE FROM product WHERE id = ?", [id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error deleting product');
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).send(`Product not found with id: ${id}`);
+        }
+        res.status(204).send(); // No content to send back
+    });
+});
+
+// POST a new product
+router.post('/', (req, res) => {
+    const { name, price, author, image_url } = req.body;
+
+    if (!name || !price || !author) {
+        return res.status(400).send('Missing required fields: name, price, and author.');
+    }
+
+    const newProduct = { name, price, author, image_url };
+    db.query("INSERT INTO product (id, name, price, author, image_url) VALUES (UUID(), ?, ?, ?, ?)", 
+             [newProduct.name, newProduct.price, newProduct.author, newProduct.image_url], 
+             (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error adding product');
+        }
+        res.status(201).json({ message: "Product created successfully", productId: result.insertId });
+    });
+});
+
+// PUT (update) a product by ID
+router.put('/:id', (req, res) => {
+    const { id } = req.params;
+    const { name, price, author, image_url } = req.body;
+
+    if (!name || !price) {
+        return res.status(400).send('Missing required fields: name and price.');
+    }
+
+    const updatedProduct = { name, price, author, image_url };
+    db.query("UPDATE product SET name = ?, price = ?, author = ?, image_url = ? WHERE id = ?", 
+             [updatedProduct.name, updatedProduct.price, updatedProduct.author, updatedProduct.image_url, id], 
+             (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error updating product');
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).send(`Product not found with id: ${id}`);
+        }
+        res.json({ message: "Product updated successfully" });
+    });
+});
+
+module.exports = router;
