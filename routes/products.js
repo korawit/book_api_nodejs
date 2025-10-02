@@ -39,21 +39,21 @@ router.delete('/:id', (req, res) => {
         if (result.affectedRows === 0) {
             return res.status(404).send(`Product not found with id: ${id}`);
         }
-        res.status(204).send(); // No content to send back
+        res.status(204).send("delete successfully!"); // No content to send back
     });
 });
 
 // POST a new product
 router.post('/', (req, res) => {
-    const { name, price, author, image_url } = req.body;
+    const { title, price, author, image_url } = req.body;
 
-    if (!name || !price || !author) {
-        return res.status(400).send('Missing required fields: name, price, and author.');
+    if (!title || !price || !author) {
+        return res.status(400).send('Missing required fields: title, price, and author.');
     }
 
-    const newProduct = { name, price, author, image_url };
-    db.query("INSERT INTO product (id, name, price, author, image_url) VALUES (UUID(), ?, ?, ?, ?)", 
-             [newProduct.name, newProduct.price, newProduct.author, newProduct.image_url], 
+    const newProduct = { title, price, author, image_url };
+    db.query("INSERT INTO product (id, title, price, author, image_url) VALUES (UUID(), ?, ?, ?, ?)", 
+             [newProduct.title, newProduct.price, newProduct.author, newProduct.image_url], 
              (err, result) => {
         if (err) {
             console.error(err);
@@ -66,15 +66,15 @@ router.post('/', (req, res) => {
 // PUT (update) a product by ID
 router.put('/:id', (req, res) => {
     const { id } = req.params;
-    const { name, price, author, image_url } = req.body;
+    const { title, price, author, image_url } = req.body;
 
-    if (!name || !price) {
-        return res.status(400).send('Missing required fields: name and price.');
+    if (!title || !price) {
+        return res.status(400).send('Missing required fields: title and price.');
     }
 
-    const updatedProduct = { name, price, author, image_url };
-    db.query("UPDATE product SET name = ?, price = ?, author = ?, image_url = ? WHERE id = ?", 
-             [updatedProduct.name, updatedProduct.price, updatedProduct.author, updatedProduct.image_url, id], 
+    const updatedProduct = { title, price, author, image_url };
+    db.query("UPDATE product SET title = ?, price = ?, author = ?, image_url = ? WHERE id = ?", 
+             [updatedProduct.title, updatedProduct.price, updatedProduct.author, updatedProduct.image_url, id], 
              (err, result) => {
         if (err) {
             console.error(err);
