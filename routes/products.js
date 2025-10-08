@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db'); // Import the database connection
+const authMiddleware = require('../middleware/authMiddleware');
 
-// GET all products
+// GET all products - Public
 router.get('/', (req, res) => {
     db.query("SELECT * FROM product", (err, result) => {
         if (err) {
@@ -13,7 +14,7 @@ router.get('/', (req, res) => {
     });
 });
 
-// GET a single product by ID
+// GET a single product by ID - Public
 router.get('/:id', (req, res) => {
     const { id } = req.params;
     db.query("SELECT * FROM product WHERE id = ?", [id], (err, result) => {
@@ -28,8 +29,8 @@ router.get('/:id', (req, res) => {
     });
 });
 
-// DELETE a product by ID
-router.delete('/:id', (req, res) => {
+// DELETE a product by ID - Protected
+router.delete('/:id', authMiddleware, (req, res) => {
     const { id } = req.params;
     db.query("DELETE FROM product WHERE id = ?", [id], (err, result) => {
         if (err) {
@@ -43,8 +44,8 @@ router.delete('/:id', (req, res) => {
     });
 });
 
-// POST a new product
-router.post('/', (req, res) => {
+// POST a new product - Protected
+router.post('/', authMiddleware, (req, res) => {
     const { title, price, author, image_url } = req.body;
 
     if (!title || !price || !author) {
@@ -63,8 +64,8 @@ router.post('/', (req, res) => {
     });
 });
 
-// PUT (update) a product by ID
-router.put('/:id', (req, res) => {
+// PUT (update) a product by ID - Protected
+router.put('/:id', authMiddleware, (req, res) => {
     const { id } = req.params;
     const { title, price, author, image_url } = req.body;
 

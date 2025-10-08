@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const productRoutes = require('./routes/products'); // Import the new routes file
+const authRoutes = require('./routes/auth'); // Import the auth routes
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use((req, res, next) => {
 
 // Use the new product routes
 app.use('/api/products', productRoutes);
+app.use('/api/auth', authRoutes);
 
 // General error handling
 app.use((err, req, res, next) => {
